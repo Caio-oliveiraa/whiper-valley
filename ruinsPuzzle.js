@@ -224,6 +224,11 @@ const RuinsPuzzle = (function () {
       return state.completed; // agora disponível externamente
     },
 
+    isModalOpen() {
+      return state.modalOpen;
+    },
+
+
     setOrientationVisible(v) {
       state.orientationVisible = !!v;
     }

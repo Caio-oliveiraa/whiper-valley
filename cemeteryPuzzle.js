@@ -161,6 +161,7 @@ window.CemeteryPuzzle = (function () {
   }
 
   function showModal() {
+    puzzleAtivo = true; // impede o jogador de se mover
     if (STATE.completed) return;
     createModal();
     const modal = document.getElementById("cemetery-puzzle-modal");
@@ -176,6 +177,7 @@ window.CemeteryPuzzle = (function () {
   }
 
   function hideModal() {
+    puzzleAtivo = false;
     const modal = document.getElementById("cemetery-puzzle-modal");
     if (modal) modal.style.visibility = "hidden";
     STATE.showModal = false;

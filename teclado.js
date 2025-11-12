@@ -8,16 +8,16 @@ function inicializarTeclado(callbacks) {
 
   document.addEventListener("keydown", (e) => {
     switch (e.code) {
-      case "ArrowUp":
+      case "KeyW":
         teclas.cima = true;
         break;
-      case "ArrowDown":
+      case "KeyS":
         teclas.baixo = true;
         break;
-      case "ArrowLeft":
+      case "KeyA":
         teclas.esquerda = true;
         break;
-      case "ArrowRight":
+      case "KeyD":
         teclas.direita = true;
         break;
       case "Space":
@@ -28,16 +28,16 @@ function inicializarTeclado(callbacks) {
 
   document.addEventListener("keyup", (e) => {
     switch (e.code) {
-      case "ArrowUp":
+      case "KeyW":
         teclas.cima = false;
         break;
-      case "ArrowDown":
+      case "KeyS":
         teclas.baixo = false;
         break;
-      case "ArrowLeft":
+      case "KeyA":
         teclas.esquerda = false;
         break;
-      case "ArrowRight":
+      case "KeyD":
         teclas.direita = false;
         break;
     }

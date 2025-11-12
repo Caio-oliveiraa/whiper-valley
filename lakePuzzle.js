@@ -326,7 +326,10 @@ function checkCompletion() {
   // adiciona a verificação de completo
   isCompleted() {
     return state.completed;
-  }
+  },
+      isModalOpen() {
+      return state.modalOpen;
+    }
 };
 
 })();

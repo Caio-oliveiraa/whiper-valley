@@ -479,6 +479,10 @@ function handleSymbolClick(btn, index, idxLabel) {
     return completed;
   }
 
+    function isModalOpen() {
+    return modalOpen;
+  }
+
   return {
     init,
     draw,
@@ -490,6 +494,7 @@ function handleSymbolClick(btn, index, idxLabel) {
     get completed() { return completed; },
     get area() { return area; },
     isCompleted,
+    isModalOpen,
   };
 
 })();

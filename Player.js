@@ -35,9 +35,20 @@ class Player {
 
   // --- FUNÇÃO MOVER ATUALIZADA (COM LÓGICA DE SLIDE CORRIGIDA) ---
   mover(teclas, map) {
-    if (npcInteragindo) {
+
+    if (
+      (ChurchPuzzle.isModalOpen && ChurchPuzzle.isModalOpen()) ||
+      (CemeteryPuzzle.isModalOpen && CemeteryPuzzle.isModalOpen()) ||
+      (LakePuzzle.isModalOpen && LakePuzzle.isModalOpen()) ||
+      (RuinsPuzzle.isModalOpen && RuinsPuzzle.isModalOpen())
+    ) {
       this.isMoving = false;
-      return; // impede qualquer movimento
+      return; // Impede movimento do player
+    }
+
+    if (npcInteragindo || puzzleAtivo) {
+      this.isMoving = false;
+      return;
     }
     // 'teclas' é o objeto { cima: true, baixo: false, ... }
     let novaX = this.x;
@@ -129,6 +140,6 @@ class Player {
       this.frameW, this.frameH,
       posX, posY,
       spriteWidth, spriteHeight
-    );
-  }
+    );
+  }
 }
