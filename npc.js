@@ -38,15 +38,18 @@ class NPC {
   interagir() {
     if (!this.interagindo) {
       this.interagindo = true;
+      npcInteragindo = true; // 🔒 trava movimento do jogador
       this.indiceFala = 0;
     } else {
       this.indiceFala++;
       if (this.indiceFala >= this.falas.length) {
         this.interagindo = false;
+        npcInteragindo = false; // 🔓 libera movimento quando termina
         this.indiceFala = 0;
       }
     }
   }
+
 
   desenhar(ctx, map) {
     const posX = Math.round((this.x - map.cameraX) * map.zoom);

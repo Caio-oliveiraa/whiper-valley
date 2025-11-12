@@ -35,6 +35,10 @@ class Player {
 
   // --- FUNÇÃO MOVER ATUALIZADA (COM LÓGICA DE SLIDE CORRIGIDA) ---
   mover(teclas, map) {
+    if (npcInteragindo) {
+      this.isMoving = false;
+      return; // impede qualquer movimento
+    }
     // 'teclas' é o objeto { cima: true, baixo: false, ... }
     let novaX = this.x;
     let novaY = this.y;

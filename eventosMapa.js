@@ -93,8 +93,8 @@ function verificarCutscene7(player) {
       "Ethan: Que lugar é esse...? Uma igreja...",
       "Ethan: Estranho... não parece uma igreja comum.",
       "Ethan: Esses símbolos... nunca vi nada assim. Tem algo de errado aqui.",
-      "Ethan: Hmm... o que é isso? Tem uns encaixes na frente...",
-      "Ethan: São iguais aos símbolos da parede... parece um tipo de enigma."
+      "Ethan: Hmm... o que é isso? Há uma frase na frente...",
+      "Ethan: Parece algum tipo de enigma..."
       
     ]);
 
@@ -147,7 +147,7 @@ function verificarCutscene8(player) {
     currentCutscene = new Cutscene('assets/cena-8.png', [
       "Ethan: Não gosto do aspecto disto.",
       "(Observando o cemitério e a torre ao longe.)",
-      "Ethan: Certo. Sete lápides. Quatro com nomes ilegíveis, e três...",
+      "Ethan: Tem sete lápides. Quatro com nomes ilegíveis, e três...",
       "Ethan: ...estas estão completamente em branco.",
       "Ethan: Isto não foi um acidente."
     ]);
@@ -171,9 +171,9 @@ function desenharPontoCutscene8(ctx, map) {
 // ------------------ CUTSCENE 9 - O Lago ------------------
 
 const pontoCutscene9 = {
-  x: 5487, // posição X no mapa (ajuste conforme o local desejado)
+  x: 5400, // posição X no mapa (ajuste conforme o local desejado)
   y: 5500, // posição Y no mapa (ajuste conforme o local desejado)
-  largura: 200,
+  largura: 400,
   altura: 200,
   ativa: false,
   jaAtivada: false
@@ -250,7 +250,7 @@ function verificarCutscene10(player) {
     currentCutscene = new Cutscene('assets/cena-10.png', [
       "Ethan: Mas o que é isso...? Ruínas em meio a este lugar... É de dar calafrios.",
       "Ethan: Essas estátuas... e os pedestais. Eles não parecem estar aqui por acaso.",
-      "Ethan: Símbolos em cada um... Um vento. Uma folha ou broto. Terra. Um tipo de... espiral?",
+      "Ethan: Símbolos em cada um... Um de água, outro de folha ou broto, terra... e um tipo de espiral?",
       "Ethan: Devem ser indicações. Cada pedestal pede por um item específico que corresponda ao seu símbolo.",
       "Ethan: A chave para o que for que esteja aqui deve ser colocar os itens corretos em cada um deles. É o que eu tenho que fazer."
     ]);

@@ -102,9 +102,9 @@
       });
 
       LakePuzzle.init({
-        x: 5487,
+        x: 5440,
         y: 5470,
-        w: 200,
+        w: 400,
         h: 200,
         orientationVisible: false
       });
@@ -115,19 +115,19 @@
     "Sebastião: Whisper Valley guarda segredos que nem o vento ousa contar...",
     "Sebastião: À noite, as vozes chamam do lago.",
     "Sebastião: Você escuta se ficar em silêncio por tempo demais.",
-    "Sebastião: Foi assim que Daniel se perdeu."
+    "Sebastião: Foi assim que Daniel se perdeu... o lago o levou."
   ]);
 
   npc2 = new NPC(3320, 2500, 400, 200, [
       "João: Os moradores... eles não são mais os mesmos.",
       "João: Olhos que não piscam... sorrisos que não alcançam o rosto.",
-      "João: Dizem que Sofia tentou ir embora... mas a floresta não deixou."
+      "João: Dizem que Sofia tentou ir embora... mas acabou morrendo entre as árvores."
     ], "assets/npc-2.png");
     
     npc3 = new NPC(6000, 1270, 400, 200, [
     "Ana: Abraxas... esse nome ainda ecoa aqui.",
     "Ana: Alguns o chamam de deus. Outros, de punição.",
-    "Ana: Jonas... ele acreditou demais. E agora está em silêncio como o resto.",
+    "Ana: Jonas... ele acreditou demais. E agora está em silêncio eterno como o resto.",
     "Ethan: Abraxas outra vez...",
     "Ethan: Todos falam desse nome como se fosse uma sombra viva.",
     "Ethan: Parece que cheguei mais perto do que devia."
@@ -211,6 +211,8 @@
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.fillText("ESPAÇO para avançar", canvas.width - 260, canvas.height - 30);
   }
+
+  let npcInteragindo = false;
 
   // ------------------ LOOP DE ATUALIZAÇÃO ------------------
   function atualizar() {
