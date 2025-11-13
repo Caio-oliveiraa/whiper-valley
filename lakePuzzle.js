@@ -152,9 +152,35 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
       offsetY = 0,
       currentParent = containers[0];
 
+  // -- Ajuste aqui a folga (em pixels).
+  // MARGEM > 0 permite sair um pouco do canvas; MARGEM = 0 bloqueia exatamente na borda.
+  const MARGEM = 20;
+
   function getCanvasRect() {
     const c = document.getElementById("meu_canvas");
     return c ? c.getBoundingClientRect() : null;
+  }
+
+  // converte uma posição global (x,y) para uma posição que esteja clampada ao canvas,
+  // considerando o tamanho do elemento e a margem MARGEM
+  function clampToCanvas(globalX, globalY, elWidth = el.offsetWidth, elHeight = el.offsetHeight) {
+    const canvasRect = getCanvasRect();
+    if (!canvasRect) return { x: globalX, y: globalY };
+
+    const minGL = canvasRect.left - MARGEM;
+    const minGT = canvasRect.top - MARGEM;
+    const maxGL = canvasRect.right - elWidth + MARGEM;
+    const maxGT = canvasRect.bottom - elHeight + MARGEM;
+
+    let gx = globalX;
+    let gy = globalY;
+
+    if (gx < minGL) gx = minGL;
+    if (gy < minGT) gy = minGT;
+    if (gx > maxGL) gx = maxGL;
+    if (gy > maxGT) gy = maxGT;
+
+    return { x: gx, y: gy };
   }
 
   el.addEventListener("mousedown", (e) => {
@@ -163,44 +189,32 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
     el.style.cursor = "grabbing";
     el.style.zIndex = 1000;
 
-    // calcula o offset RELATIVO ao parent atual (mantive seu cálculo)
     const parentRect = el.parentElement.getBoundingClientRect();
     const left = parseFloat(el.style.left || "0");
     const top = parseFloat(el.style.top || "0");
     offsetX = e.clientX - (parentRect.left + left);
     offsetY = e.clientY - (parentRect.top + top);
 
-    // evita seleção de texto
     e.preventDefault();
   });
 
   window.addEventListener("mousemove", (e) => {
     if (!dragging) return;
 
-    // 1) posição desejada em COORDENADAS GLOBAIS (tela)
+    // posição desejada em coordenadas globais
     let desiredGlobalLeft = e.clientX - offsetX;
     let desiredGlobalTop  = e.clientY - offsetY;
 
-    // 2) clamp no retângulo do canvas (impede sair do canvas)
-    const canvasRect = getCanvasRect();
-    if (canvasRect) {
-      const minGL = canvasRect.left;
-      const minGT = canvasRect.top;
-      const maxGL = canvasRect.right - el.offsetWidth;
-      const maxGT = canvasRect.bottom - el.offsetHeight;
+    // aplica clamp ao canvas com margem
+    const clamped = clampToCanvas(desiredGlobalLeft, desiredGlobalTop);
+    desiredGlobalLeft = clamped.x;
+    desiredGlobalTop  = clamped.y;
 
-      if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
-      if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
-      if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
-      if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
-    }
-
-    // 3) converte para coordenadas do parent atual (mantendo liberdade de se mover "fora" do parent)
+    // converte para coordenadas do parent atual
     const parentRect = el.parentElement.getBoundingClientRect();
     const newLeft = desiredGlobalLeft - parentRect.left;
     const newTop  = desiredGlobalTop  - parentRect.top;
 
-    // NÃO travamos por parent aqui — assim a peça pode ficar parcialmente fora do parent
     el.style.left = `${newLeft}px`;
     el.style.top  = `${newTop}px`;
   });
@@ -211,6 +225,7 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
     el.style.cursor = "grab";
     el.style.zIndex = 10;
 
+    // encontra container sob o mouse
     const overContainer = containers.find(c => {
       const rect = c.getBoundingClientRect();
       return (
@@ -222,28 +237,15 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
     });
 
     if (overContainer) {
-      // anexa ao container de destino
       overContainer.appendChild(el);
-
       const rect = overContainer.getBoundingClientRect();
 
-      // calcula a posição final desejada em globais (mesma lógica do mousemove)
+      // posição final desejada (globais) e clamp
       let desiredGlobalLeft = e.clientX - offsetX;
       let desiredGlobalTop  = e.clientY - offsetY;
-
-      // clamp pelo canvas também no soltar
-      const canvasRect = getCanvasRect();
-      if (canvasRect) {
-        const minGL = canvasRect.left;
-        const minGT = canvasRect.top;
-        const maxGL = canvasRect.right - el.offsetWidth;
-        const maxGT = canvasRect.bottom - el.offsetHeight;
-
-        if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
-        if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
-        if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
-        if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
-      }
+      const clamped = clampToCanvas(desiredGlobalLeft, desiredGlobalTop, el.offsetWidth, el.offsetHeight);
+      desiredGlobalLeft = clamped.x;
+      desiredGlobalTop  = clamped.y;
 
       let left = desiredGlobalLeft - rect.left;
       let top  = desiredGlobalTop  - rect.top;
@@ -252,7 +254,7 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
       el.style.top  = `${top}px`;
       currentParent = overContainer;
 
-      // Encaixe na grade (comportamento original)
+      // encaixe na grade
       if (overContainer === containers[1]) {
         const correctRow = Math.floor(piece.index / COLS);
         const correctCol = piece.index % COLS;
@@ -270,26 +272,16 @@ function makeDraggable(el, containers, piece, pieceW, pieceH) {
         }
       }
     } else {
-      // se soltou fora de qualquer container, devolve pro primeiro container (com clamp pelo canvas)
+      // devolve para o primeiro container (com clamp)
       const parent = containers[0];
       parent.appendChild(el);
       const rect = parent.getBoundingClientRect();
 
       let desiredGlobalLeft = e.clientX - offsetX;
       let desiredGlobalTop  = e.clientY - offsetY;
-
-      const canvasRect = getCanvasRect();
-      if (canvasRect) {
-        const minGL = canvasRect.left;
-        const minGT = canvasRect.top;
-        const maxGL = canvasRect.right - el.offsetWidth;
-        const maxGT = canvasRect.bottom - el.offsetHeight;
-
-        if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
-        if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
-        if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
-        if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
-      }
+      const clamped = clampToCanvas(desiredGlobalLeft, desiredGlobalTop, el.offsetWidth, el.offsetHeight);
+      desiredGlobalLeft = clamped.x;
+      desiredGlobalTop  = clamped.y;
 
       let left = desiredGlobalLeft - rect.left;
       let top  = desiredGlobalTop  - rect.top;
