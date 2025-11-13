@@ -313,7 +313,7 @@
         if (jogoAtivo) {
           tentarColetarItem();
           // Interagir com o puzzle do cemitério
-        if (CemeteryPuzzle && CemeteryPuzzle.playerInArea && CemeteryPuzzle.showModal) {
+        if (CemeteryPuzzle && CemeteryPuzzle.playerInArea && !CemeteryPuzzle.isCompleted()) {
           if (CemeteryPuzzle.playerInArea(player, mapa)) {
             CemeteryPuzzle.showModal();
             return;

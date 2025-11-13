@@ -139,6 +139,7 @@ window.CemeteryPuzzle = (function () {
         msgEl.style.color = "#32cd32"; // verde mais vibrante
         msgEl.textContent = "Correto! O silêncio agora repousa em paz...";
         STATE.completed = true;
+        STATE.active = false;
 
         // aguarda 2 segundos antes de fechar o modal
         setTimeout(() => {
@@ -234,14 +235,6 @@ window.CemeteryPuzzle = (function () {
         ctx.shadowBlur = 8;
         ctx.fillText("ESPAÇO para interagir", x + w / 2, y - 20 * (map.zoom || 1));
         ctx.shadowBlur = 0; // limpa sombra após desenhar
-    }
-
-    // se concluído, desenhar um pequeno ícone verde
-    if (STATE.completed) {
-      ctx.fillStyle = "rgba(0,200,0,0.9)";
-      ctx.beginPath();
-      ctx.arc(x + w - 10 * (map.zoom||1), y + 10 * (map.zoom||1), 6 * (map.zoom||1), 0, Math.PI*2);
-      ctx.fill();
     }
 
     ctx.restore();
