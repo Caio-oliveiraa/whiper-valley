@@ -144,78 +144,163 @@ const LakePuzzle = (function () {
     return state.dom;
   }
 
-    function makeDraggable(el, containers, piece, pieceW, pieceH) {
-    let dragging = false, offsetX = 0, offsetY = 0, currentParent = containers[0];
+  
 
-    el.addEventListener("mousedown", (e) => {
-        if (el.fixed) return;
-        dragging = true;
-        el.style.cursor = "grabbing";
-        el.style.zIndex = 1000;
+function makeDraggable(el, containers, piece, pieceW, pieceH) {
+  let dragging = false,
+      offsetX = 0,
+      offsetY = 0,
+      currentParent = containers[0];
 
-        const parentRect = el.parentElement.getBoundingClientRect();
-        offsetX = e.clientX - (parentRect.left + parseFloat(el.style.left));
-        offsetY = e.clientY - (parentRect.top + parseFloat(el.style.top));
-    });
+  function getCanvasRect() {
+    const c = document.getElementById("meu_canvas");
+    return c ? c.getBoundingClientRect() : null;
+  }
 
-    window.addEventListener("mousemove", (e) => {
-        if (!dragging) return;
+  el.addEventListener("mousedown", (e) => {
+    if (el.fixed) return;
+    dragging = true;
+    el.style.cursor = "grabbing";
+    el.style.zIndex = 1000;
 
-        const parentRect = el.parentElement.getBoundingClientRect();
-        const newLeft = e.clientX - parentRect.left - offsetX;
-        const newTop = e.clientY - parentRect.top - offsetY;
+    // calcula o offset RELATIVO ao parent atual (mantive seu cálculo)
+    const parentRect = el.parentElement.getBoundingClientRect();
+    const left = parseFloat(el.style.left || "0");
+    const top = parseFloat(el.style.top || "0");
+    offsetX = e.clientX - (parentRect.left + left);
+    offsetY = e.clientY - (parentRect.top + top);
 
-        el.style.left = `${newLeft}px`;
-        el.style.top = `${newTop}px`;
-    });
+    // evita seleção de texto
+    e.preventDefault();
+  });
 
-    window.addEventListener("mouseup", (e) => {
-        if (!dragging) return;
-        dragging = false;
-        el.style.cursor = "grab";
-        el.style.zIndex = 10;
+  window.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
 
-        const overContainer = containers.find(c => {
-        const rect = c.getBoundingClientRect();
-        return (
-            e.clientX >= rect.left &&
-            e.clientX <= rect.right &&
-            e.clientY >= rect.top &&
-            e.clientY <= rect.bottom
-        );
-        });
+    // 1) posição desejada em COORDENADAS GLOBAIS (tela)
+    let desiredGlobalLeft = e.clientX - offsetX;
+    let desiredGlobalTop  = e.clientY - offsetY;
 
-        if (overContainer) {
-        overContainer.appendChild(el);
-        const rect = overContainer.getBoundingClientRect();
-        const left = e.clientX - rect.left - offsetX;
-        const top = e.clientY - rect.top - offsetY;
-        el.style.left = `${left}px`;
-        el.style.top = `${top}px`;
-        currentParent = overContainer;
+    // 2) clamp no retângulo do canvas (impede sair do canvas)
+    const canvasRect = getCanvasRect();
+    if (canvasRect) {
+      const minGL = canvasRect.left;
+      const minGT = canvasRect.top;
+      const maxGL = canvasRect.right - el.offsetWidth;
+      const maxGT = canvasRect.bottom - el.offsetHeight;
 
-        // Encaixe na grade
-        if (overContainer === containers[1]) {
-            const correctRow = Math.floor(piece.index / COLS);
-            const correctCol = piece.index % COLS;
-            const targetX = correctCol * pieceW;
-            const targetY = correctRow * pieceH;
-            const dist = Math.hypot(left - targetX, top - targetY);
-
-            if (dist < 30) {
-            el.style.left = `${targetX}px`;
-            el.style.top = `${targetY}px`;
-            el.fixed = true;
-            el.style.cursor = "default";
-            el.style.pointerEvents = "none";
-            checkCompletion();
-            }
-        }
-        } else {
-        containers[0].appendChild(el);
-        }
-    });
+      if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
+      if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
+      if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
+      if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
     }
+
+    // 3) converte para coordenadas do parent atual (mantendo liberdade de se mover "fora" do parent)
+    const parentRect = el.parentElement.getBoundingClientRect();
+    const newLeft = desiredGlobalLeft - parentRect.left;
+    const newTop  = desiredGlobalTop  - parentRect.top;
+
+    // NÃO travamos por parent aqui — assim a peça pode ficar parcialmente fora do parent
+    el.style.left = `${newLeft}px`;
+    el.style.top  = `${newTop}px`;
+  });
+
+  window.addEventListener("mouseup", (e) => {
+    if (!dragging) return;
+    dragging = false;
+    el.style.cursor = "grab";
+    el.style.zIndex = 10;
+
+    const overContainer = containers.find(c => {
+      const rect = c.getBoundingClientRect();
+      return (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      );
+    });
+
+    if (overContainer) {
+      // anexa ao container de destino
+      overContainer.appendChild(el);
+
+      const rect = overContainer.getBoundingClientRect();
+
+      // calcula a posição final desejada em globais (mesma lógica do mousemove)
+      let desiredGlobalLeft = e.clientX - offsetX;
+      let desiredGlobalTop  = e.clientY - offsetY;
+
+      // clamp pelo canvas também no soltar
+      const canvasRect = getCanvasRect();
+      if (canvasRect) {
+        const minGL = canvasRect.left;
+        const minGT = canvasRect.top;
+        const maxGL = canvasRect.right - el.offsetWidth;
+        const maxGT = canvasRect.bottom - el.offsetHeight;
+
+        if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
+        if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
+        if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
+        if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
+      }
+
+      let left = desiredGlobalLeft - rect.left;
+      let top  = desiredGlobalTop  - rect.top;
+
+      el.style.left = `${left}px`;
+      el.style.top  = `${top}px`;
+      currentParent = overContainer;
+
+      // Encaixe na grade (comportamento original)
+      if (overContainer === containers[1]) {
+        const correctRow = Math.floor(piece.index / COLS);
+        const correctCol = piece.index % COLS;
+        const targetX = correctCol * pieceW;
+        const targetY = correctRow * pieceH;
+        const dist = Math.hypot(left - targetX, top - targetY);
+
+        if (dist < 30) {
+          el.style.left = `${targetX}px`;
+          el.style.top = `${targetY}px`;
+          el.fixed = true;
+          el.style.cursor = "default";
+          el.style.pointerEvents = "none";
+          checkCompletion();
+        }
+      }
+    } else {
+      // se soltou fora de qualquer container, devolve pro primeiro container (com clamp pelo canvas)
+      const parent = containers[0];
+      parent.appendChild(el);
+      const rect = parent.getBoundingClientRect();
+
+      let desiredGlobalLeft = e.clientX - offsetX;
+      let desiredGlobalTop  = e.clientY - offsetY;
+
+      const canvasRect = getCanvasRect();
+      if (canvasRect) {
+        const minGL = canvasRect.left;
+        const minGT = canvasRect.top;
+        const maxGL = canvasRect.right - el.offsetWidth;
+        const maxGT = canvasRect.bottom - el.offsetHeight;
+
+        if (desiredGlobalLeft < minGL) desiredGlobalLeft = minGL;
+        if (desiredGlobalTop  < minGT) desiredGlobalTop  = minGT;
+        if (desiredGlobalLeft > maxGL) desiredGlobalLeft = maxGL;
+        if (desiredGlobalTop  > maxGT) desiredGlobalTop  = maxGT;
+      }
+
+      let left = desiredGlobalLeft - rect.left;
+      let top  = desiredGlobalTop  - rect.top;
+
+      el.style.left = `${left}px`;
+      el.style.top  = `${top}px`;
+      currentParent = parent;
+    }
+  });
+}
+
 
 
 
