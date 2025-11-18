@@ -12,7 +12,7 @@ window.CemeteryPuzzle = (function () {
   };
 
   // nomes corretos na ordem dos campos 1-2-3
-  const CORRECT = ["daniel", "sofia", "jonas"];
+  const CORRECT = ["sofia", "daniel", "jonas"];
 
   // distância de ativação em pixels (usada como "proximidade" alternativa)
   const PROX_DIST = 130; // você pode ajustar
